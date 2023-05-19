@@ -255,6 +255,16 @@ namespace QuantConnect.Data.Consolidators
         }
 
         /// <summary>
+        /// Resets this consolidator to its initial state
+        /// </summary>
+        public void Reset()
+        {
+            _lastEmit = DateTime.MinValue;
+            _currentCount = 0;
+            _workingBar = null;
+        }
+
+        /// <summary>
         /// Returns true if this consolidator is time-based, false otherwise
         /// </summary>
         protected bool IsTimeBased => !_maxCount.HasValue;
