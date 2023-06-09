@@ -31,15 +31,15 @@ namespace QuantConnect.Algorithm.CSharp
     {
         private DateTime _previous;
         private MovingAverageConvergenceDivergence _macd;
-        private readonly string _symbol = "SPY";
+        private readonly string _symbol = "AAPL";
 
         /// <summary>
         /// Initialise the data and resolution required, as well as the cash and start-end dates for your algorithm. All algorithms must initialized.
         /// </summary>
         public override void Initialize()
         {
-            SetStartDate(2004, 01, 01);
-            SetEndDate(2015, 01, 01);
+            SetStartDate(2014, 01, 01);
+            SetEndDate(2023, 05, 01);
 
             AddSecurity(SecurityType.Equity, _symbol, Resolution.Daily);
 
@@ -61,7 +61,7 @@ namespace QuantConnect.Algorithm.CSharp
             var holding = Portfolio[_symbol];
 
             var signalDeltaPercent = (_macd - _macd.Signal)/_macd.Fast;
-            var tolerance = 0.0025m;
+            var tolerance = 0.01m;
 
             // if our macd is greater than our signal, then let's go long
             if (holding.Quantity <= 0 && signalDeltaPercent > tolerance) // 0.01%

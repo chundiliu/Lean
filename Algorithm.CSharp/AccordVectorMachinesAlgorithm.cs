@@ -28,22 +28,22 @@ namespace QuantConnect.Algorithm.CSharp
         // Define the size of the data used to train the model
         // It will use _lookback sets with _inputSize members
         // Those members are rate of return
-        private const int _lookback = 30;
-        private const int _inputSize = 5;
+        private const int _lookback = 60;
+        private const int _inputSize = 10;
         private RollingWindow<double> _window = new RollingWindow<double>(_inputSize * _lookback + 2);
 
         public override void Initialize()
         {
-            SetStartDate(2013, 10, 07);
-            SetEndDate(2013, 10, 11);
-            SetCash(100000);
+            SetStartDate(2014, 01, 01);
+            SetEndDate(2023, 05, 01);
+            SetCash(1_000_000);
 
-            var symbol = AddEquity("SPY").Symbol;
+            var symbol = AddEquity("AAPL", Resolution.Daily).Symbol;
 
             ROC(symbol, 1, Resolution.Daily).Updated += (s, e) => _window.Add((double)e.Value);
 
-            Schedule.On(DateRules.Every(DayOfWeek.Monday),
-                TimeRules.AfterMarketOpen(symbol, 10),
+            Schedule.On(DateRules.EveryDay(),
+                TimeRules.Midnight,
                 TrainAndTrade);
 
             SetWarmUp(_window.Size, Resolution.Daily);
@@ -81,7 +81,7 @@ namespace QuantConnect.Algorithm.CSharp
             var value = svm.Compute(new[] {last});
             if (value.IsNaNOrZero()) return;
 
-            SetHoldings("SPY", Math.Sign(value));
+            SetHoldings("AAPL", Math.Sign(value));
         }
     }
 }

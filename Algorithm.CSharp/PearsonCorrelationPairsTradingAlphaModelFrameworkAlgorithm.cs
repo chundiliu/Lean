@@ -34,23 +34,26 @@ namespace QuantConnect.Algorithm.CSharp
     {
         public override void Initialize()
         {
-            SetStartDate(2013, 10, 07);
-            SetEndDate(2013, 10, 11);
+            SetStartDate(2014, 05, 01);
+            SetEndDate(2023, 05, 01);
 
-            var symbols = new[] { "SPY", "AIG", "BAC", "IBM" }
+            var symbols = new[] {"XLE", "XOM"}
                 .Select(ticker => QuantConnect.Symbol.Create(ticker, SecurityType.Equity, Market.USA))
                 .ToList();
+            
+            UniverseSettings.Resolution = Resolution.Daily;
 
             // Manually add SPY and AIG when the algorithm starts
-            SetUniverseSelection(new ManualUniverseSelectionModel(symbols.Take(2)));
+            // SetUniverseSelection(new ManualUniverseSelectionModel(symbols.Take(2)));
 
             // At midnight, add all securities every day except on the last data
             // With this procedure, the Alpha Model will experience multiple universe changes
-            AddUniverseSelection(new ScheduledUniverseSelectionModel(
-                DateRules.EveryDay(), TimeRules.Midnight,
-                dt => dt < EndDate.AddDays(-1) ? symbols : Enumerable.Empty<Symbol>()));
+            // AddUniverseSelection(new ScheduledUniverseSelectionModel(
+            //     DateRules.EveryDay(), TimeRules.Midnight,
+            //     dt => dt < EndDate.AddDays(-1) ? symbols : Enumerable.Empty<Symbol>()));
 
-            SetAlpha(new PearsonCorrelationPairsTradingAlphaModel(252, Resolution.Daily));
+            SetAlpha(new PearsonCorrelationPairsTradingAlphaModel(100, Resolution.Daily, 10m, 0.7))
+                ;
             SetPortfolioConstruction(new EqualWeightingPortfolioConstructionModel());
             SetExecution(new ImmediateExecutionModel());
             SetRiskManagement(new NullRiskManagementModel());
@@ -59,6 +62,7 @@ namespace QuantConnect.Algorithm.CSharp
         public override void OnEndOfAlgorithm()
         {
             // We have removed all securities from the universe. The Alpha Model should remove the consolidator
+            SetUniverseSelection(new NullUniverseSelectionModel());
             var consolidatorCount = SubscriptionManager.Subscriptions.Sum(s => s.Consolidators.Count);
             if (consolidatorCount > 0)
             {
